@@ -3,7 +3,7 @@
 1. Clone the repository
 
 ```
-        git clone https://github.com/AshleyAlexJacob/Flask-API-Folder-Guide-2023
+        git clone https://github.com/akshaychemy/flask_demo
 ```
 
 2. Create python virutal environment
