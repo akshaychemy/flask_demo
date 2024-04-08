@@ -1,0 +1,46 @@
+# Virtual environment
+venv/
+
+# Instance folder (contains instance-specific configuration)
+instance/
+
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Python cache and environment variables files
+*.pyc
+.env
+
+# IDE files
+.idea/
+.vscode/
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+*.class
+*.o
+*.a
+*.out
+*.dll
+*.so
+*.dylib
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+
+#migrations
+migrations/
