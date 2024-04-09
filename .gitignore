@@ -14,7 +14,6 @@ bower_components/
 
 # Python cache and environment variables files
 *.pyc
-.env
 
 # IDE files
 .idea/

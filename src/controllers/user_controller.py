@@ -8,68 +8,67 @@ import os
 # user controller blueprint to be registered with api blueprint
 users = Blueprint("users", __name__)
 
-# route for signup api/users/signup
-@users.route('/signup', methods = ["POST"])
+# Route for signup api/users/signup
+@users.route('/signup', methods=["POST"])
 def handle_signup():
-    try: 
-        # first validate required use parameters
+    try:
+        # First validate required user parameters
         data = request.json
         if "firstname" in data and "lastname" in data and "email" in data and "password" in data:
-            # validate if the user exist 
-            user = User.query.filter_by(email = data["email"]).first()
-            # usecase if the user doesn't exists
+            # Validate if the user exists
+            user = User.query.filter_by(email=data["email"]).first()
+            # Use case if the user doesn't exist
             if not user:
-                # creating the user instance of User Model to be stored in DB
+                # Creating the user instance of User Model to be stored in DB
                 user_obj = User(
-                    firstname = data["firstname"],
-                    lastname = data["lastname"],
-                    email = data["email"],
-                    # hashing the password
-                    password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+                    firstname=data["firstname"],
+                    lastname=data["lastname"],
+                    email=data["email"],
+                    # Hashing the password
+                    password=bcrypt.generate_password_hash(data['password']).decode('utf-8')
                 )
                 db.session.add(user_obj)
                 db.session.commit()
 
-                # lets generate jwt token
+                # Let's generate JWT token
                 payload = {
                     'iat': datetime.utcnow(),
-                    'user_id': str(user_obj.id).replace('-',""),
+                    'user_id': str(user_obj.id).replace('-', ""),
                     'firstname': user_obj.firstname,
                     'lastname': user_obj.lastname,
                     'email': user_obj.email,
                 }
-                token = jwt.encode(payload,os.getenv('SECRET_KEY'),algorithm='HS256')
+                token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
                 return Response(
-                response=json.dumps({'status': "success",
-                                    "message": "User Sign up Successful",
-                                    "token": token}),
-                status=201,
-                mimetype='application/json'
-            )
+                    response=json.dumps({'status': "success",
+                                         "message": "User Sign up Successful",
+                                         "token": token}),
+                    status=201,
+                    mimetype='application/json'
+                )
             else:
-                print(user)
-                # if user already exists
+                # If user already exists
                 return Response(
-                response=json.dumps({'status': "failed", "message": "User already exists kindly use sign in"}),
-                status=409,
-                mimetype='application/json'
-            )
+                    response=json.dumps({'status': "failed", "message": "User already exists. Kindly sign in."}),
+                    status=409,
+                    mimetype='application/json'
+                )
         else:
-            # if request parameters are not correct 
+            # If request parameters are not correct
             return Response(
-                response=json.dumps({'status': "failed", "message": "User Parameters Firstname, Lastname, Email and Password are required"}),
+                response=json.dumps({'status': "failed", "message": "User parameters (Firstname, Lastname, Email, and Password) are required"}),
                 status=400,
                 mimetype='application/json'
             )
-        
+
     except Exception as e:
         return Response(
-                response=json.dumps({'status': "failed", 
-                                     "message": "Error Occured",
-                                     "error": str(e)}),
-                status=500,
-                mimetype='application/json'
-            )
+            response=json.dumps({'status': "failed",
+                                 "message": "Error occurred",
+                                 "error": str(e)}),
+            status=500,
+            mimetype='application/json'
+        )
 
 # route for login api/users/signin
 @users.route('/signin', methods = ["POST"])
