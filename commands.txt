@@ -1,0 +1,12 @@
+postgres --version
+sudo service postgresql status
+sudo service postgresql start
+
+sudo -u postgres psql
+CREATE DATABASE database_name;
+
+createdb -U postgres -h localhost -p 5432 database_name
+
+flask db init
+flask db migrate
+flask db upgrade
