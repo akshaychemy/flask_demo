@@ -5,7 +5,7 @@ from datetime import datetime
 import jwt
 import os
 
-from src import collection
+from src import collection,db
 
 # user controller blueprint to be registered with api blueprint
 users = Blueprint("users", __name__)
