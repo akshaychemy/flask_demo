@@ -5,164 +5,108 @@ from datetime import datetime
 import jwt
 import os
 
+from src import collection
+
 # user controller blueprint to be registered with api blueprint
 users = Blueprint("users", __name__)
 
 # route for signup api/users/signup
-@users.route('/signup', methods = ["POST"])
+@users.route('/signup', methods=["POST"])
 def handle_signup():
-    try: 
-        # first validate required use parameters
+    try:
+        # first validate required user parameters
         data = request.json
         if "firstname" in data and "lastname" in data and "email" in data and "password" in data:
-            # validate if the user exist 
-            user = User.query.filter_by(email = data["email"]).first()
-            # usecase if the user doesn't exists
+            # validate if the user exists
+            user = collection.find_one({"email": data["email"]})
+            print("user==>", user)
+            # use case if the user doesn't exist
             if not user:
-                # creating the user instance of User Model to be stored in DB
-                user_obj = User(
-                    firstname = data["firstname"],
-                    lastname = data["lastname"],
-                    email = data["email"],
-                    # hashing the password
-                    password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
-                )
-                db.session.add(user_obj)
-                db.session.commit()
+                # creating the user instance to be stored in DB
+                user_data = {
+                    "firstname": data["firstname"],
+                    "lastname": data["lastname"],
+                    "email": data["email"],
+                    "password": bcrypt.generate_password_hash(data['password'])
+                }
+                # insert user data into MongoDB
+                result = collection.insert_one(user_data)
+                print("result==>",result)
 
-                # lets generate jwt token
+                # let's generate a JWT token
                 payload = {
                     'iat': datetime.utcnow(),
-                    'user_id': str(user_obj.id).replace('-',""),
-                    'firstname': user_obj.firstname,
-                    'lastname': user_obj.lastname,
-                    'email': user_obj.email,
+                    'user_id': str(result.inserted_id),
+                    'firstname': user_data["firstname"],
+                    'lastname': user_data["lastname"],
+                    'email': user_data["email"],
                 }
-                token = jwt.encode(payload,os.getenv('SECRET_KEY'),algorithm='HS256')
-                return Response(
-                response=json.dumps({'status': "success",
-                                    "message": "User Sign up Successful",
-                                    "token": token}),
-                status=201,
-                mimetype='application/json'
-            )
+                token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
+                return jsonify({'status': "success",
+                                "message": "User Sign up Successful",
+                                "token": token}), 201
             else:
-                print(user)
                 # if user already exists
-                return Response(
-                response=json.dumps({'status': "failed", "message": "User already exists kindly use sign in"}),
-                status=409,
-                mimetype='application/json'
-            )
+                return jsonify({'status': "failed", "message": "User already exists, kindly use sign in"}), 409
         else:
-            # if request parameters are not correct 
-            return Response(
-                response=json.dumps({'status': "failed", "message": "User Parameters Firstname, Lastname, Email and Password are required"}),
-                status=400,
-                mimetype='application/json'
-            )
-        
-    except Exception as e:
-        return Response(
-                response=json.dumps({'status': "failed", 
-                                     "message": "Error Occured",
-                                     "error": str(e)}),
-                status=500,
-                mimetype='application/json'
-            )
+            # if request parameters are not correct
+            return jsonify({'status': "failed", "message": "User parameters Firstname, Lastname, Email, and Password are required"}), 400
 
+    except Exception as e:
+        return jsonify({'status': "failed", "message": "Error Occurred", "error": str(e)}), 500
+
+        
 # route for login api/users/signin
-@users.route('/signin', methods = ["POST"])
+@users.route('/signin', methods=["POST"])
 def handle_login():
-    try: 
+    try:
         # first check user parameters
         data = request.json
         if "email" and "password" in data:
-            # check db for user records
-            user = User.query.filter_by(email = data["email"]).first()
+            # check the database for user records
+            user = collection.find_one({"email": data["email"]})
 
-            # if user records exists we will check user password
+            # if user record exists, we will check the password
             if user:
                 # check user password
-                if bcrypt.check_password_hash(user.password, data["password"]):
-                    # user password matched, we will generate token
+                if bcrypt.check_password_hash(user["password"], data["password"]):
+                    # user password matched, we will generate a token
                     payload = {
                         'iat': datetime.utcnow(),
-                        'user_id': str(user.id).replace('-',""),
-                        'firstname': user.firstname,
-                        'lastname': user.lastname,
-                        'email': user.email,
-                        }
-                    token = jwt.encode(payload,os.getenv('SECRET_KEY'),algorithm='HS256')
-                    return Response(
-                            response=json.dumps({'status': "success",
-                                                "message": "User Sign In Successful",
-                                                "token": token}),
-                            status=200,
-                            mimetype='application/json'
-                        )
-                
+                        'user_id': str(user["_id"]),
+                        'firstname': user["firstname"],
+                        'lastname': user["lastname"],
+                        'email': user["email"],
+                    }
+                    token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
+                    return jsonify({
+                        'status': "success",
+                        "message": "User Sign In Successful",
+                        "token": token
+                    }), 200
+
                 else:
-                    return Response(
-                        response=json.dumps({'status': "failed", "message": "User Password Mistmatched"}),
-                        status=401,
-                        mimetype='application/json'
-                    ) 
-            # if there is no user record
+                    return jsonify({
+                        'status': "failed",
+                        "message": "User Password Mismatched"
+                    }), 401
             else:
-                return Response(
-                    response=json.dumps({'status': "failed", "message": "User Record doesn't exist, kindly register"}),
-                    status=404,
-                    mimetype='application/json'
-                ) 
+                # if there is no user record
+                return jsonify({
+                    'status': "failed",
+                    "message": "User Record doesn't exist, kindly register"
+                }), 404
         else:
-            # if request parameters are not correct 
-            return Response(
-                response=json.dumps({'status': "failed", "message": "User Parameters Email and Password are required"}),
-                status=400,
-                mimetype='application/json'
-            )
-        
-    except Exception as e:
-        return Response(
-                response=json.dumps({'status': "failed", 
-                                     "message": "Error Occured",
-                                     "error": str(e)}),
-                status=500,
-                mimetype='application/json'
-            )
-
-
-# Define a route to find a user by ID
-#api/users/find/1
-@users.route('find/<int:user_id>', methods=["GET"])
-def get_user(user_id):
-    try:
-        # Query the database for the user with the given ID
-        user = User.query.get(user_id)
-
-        # If user is not found, return 404 Not Found response
-        if not user:
-            return Response(
-                response=jsonify({'status': "failed", "message": "User not found"}),
-                status=404,
-                mimetype='application/json'
-            )
-
-        # If user is found, return user details
-        user_data = {
-            'id': user.id,
-            'firstname': user.firstname,
-            'lastname': user.lastname,
-            'email': user.email
-        }
-
-        return jsonify({'status': "success", "user": user_data})
+            # if request parameters are not correct
+            return jsonify({
+                'status': "failed",
+                "message": "User Parameters Email and Password are required"
+            }), 400
 
     except Exception as e:
-        # Return response in case of any error
-        return Response(
-            response=jsonify({'status': "failed", "message": "Error Occurred", "error": str(e)}),
-            status=500,
-            mimetype='application/json'
-        )
+        return jsonify({
+            'status': "failed",
+            "message": "Error Occurred",
+            "error": str(e)
+        }), 500
+

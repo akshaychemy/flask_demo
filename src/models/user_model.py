@@ -1,9 +1,20 @@
-
 from src import db
 
-class User(db.Model):
-    id = db.Column(db.Integer(), primary_key = True, unique=True)
-    firstname = db.Column(db.String(60))
-    lastname = db.Column(db.String(60))
-    email = db.Column(db.String(70), unique = True)
-    password = db.Column(db.String(80))
+class User:
+    def __init__(self, firstname, lastname, email, password):
+        self.firstname = firstname
+        self.lastname = lastname
+        self.email = email
+        self.password = password
+
+    def save(self):
+        db.users.insert_one({
+            "firstname": self.firstname,
+            "lastname": self.lastname,
+            "email": self.email,
+            "password": self.password
+        })
+
+    @staticmethod
+    def find_by_email(email):
+        return db.users.find_one({"email": email})
