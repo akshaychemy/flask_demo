@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 # for password hashing
 from flask_bcrypt import Bcrypt
+from src.config.database_config import DatabaseConfig
 
 # loading environment variables
 load_dotenv()
@@ -23,11 +24,8 @@ app.env = config.ENV
 app.secret_key = os.environ.get("SECRET_KEY")
 bcrypt = Bcrypt(app)
 
-# Path for our local sql lite database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI_DEV")
-
-# To specify to track modifications of objects and emit signals
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
+# Initialize database configuration
+DatabaseConfig(app)
 
 # sql alchemy instance
 db = SQLAlchemy(app)
