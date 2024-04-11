@@ -6,10 +6,10 @@ import jwt
 import os
 
 # user controller blueprint to be registered with api blueprint
-users = Blueprint("users", __name__)
+# users = Blueprint("users", __name__)
 
-# Route for signup api/users/signup
-@users.route('/signup', methods=["POST"])
+# # Route for signup api/users/signup
+# @users.route('/signup', methods=["POST"])
 def handle_signup():
     try:
         # First validate required user parameters
@@ -71,7 +71,7 @@ def handle_signup():
         )
 
 # route for login api/users/signin
-@users.route('/signin', methods = ["POST"])
+# @users.route('/signin', methods = ["POST"])
 def handle_login():
     try: 
         # first check user parameters
@@ -134,7 +134,7 @@ def handle_login():
 
 # Define a route to find a user by ID
 #api/users/find/1
-@users.route('find/<int:user_id>', methods=["GET"])
+# @users.route('find/<int:user_id>', methods=["GET"])
 def get_user(user_id):
     try:
         # Query the database for the user with the given ID
