@@ -1,3 +1,18 @@
+
+# Project Name
+
+Brief description of the project.
+
+## Table of Contents
+1. [Installation](#installation)
+2. [Usage](#usage)
+3. [Contributing](#contributing)
+4. [License](#license)
+
+## Installation
+
+Provide instructions on how to install the project, including any dependencies.
+
 ### Run Application
 
 1. Clone the repository
@@ -39,21 +54,6 @@ flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
 ```
-
-
-# Project Name
-
-Brief description of the project.
-
-## Table of Contents
-1. [Installation](#installation)
-2. [Usage](#usage)
-3. [Contributing](#contributing)
-4. [License](#license)
-
-## Installation
-
-Provide instructions on how to install the project, including any dependencies.
 
 ## Usage
 
