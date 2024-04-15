@@ -1,5 +1,5 @@
 
-# Project Name
+# Omni Assist
 
 Brief description of the project.
 
@@ -7,11 +7,11 @@ Brief description of the project.
 1. [Installation](#installation)
 2. [Usage](#usage)
 3. [Contributing](#contributing)
-4. [License](#license)
+4. [License](LICENSE.md)
 
 ## Installation
 
-Provide instructions on how to install the project, including any dependencies.
+Instructions on how to clone and install the application.
 
 ### Run Application
 
